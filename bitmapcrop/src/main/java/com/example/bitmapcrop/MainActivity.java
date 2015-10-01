@@ -56,15 +56,15 @@ public class MainActivity extends AppCompatActivity {
         URI imageUri = file.toURI();
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT, null);
         intent.setType("image/*");
-        intent.putExtra("crop", "true");
-        intent.putExtra("aspectX", 2);
-        intent.putExtra("aspectY", 1);
-        intent.putExtra("outputX", 600);
-        intent.putExtra("outputY", 300);
-        intent.putExtra("scale", true);
+//        intent.putExtra("crop", "true");
+//        intent.putExtra("aspectX", 1);
+//        intent.putExtra("aspectY", 1);
+//        intent.putExtra("outputX", 600);
+//        intent.putExtra("outputY", 600);
+//        intent.putExtra("scale", true);
         intent.putExtra("return-data", false);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-        intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
+        intent.putExtra("outputFormat", Bitmap.CompressFormat.PNG.toString());
         intent.putExtra("noFaceDetection", true); // no face detection
         startActivityForResult(intent, CHOOSE_BIG_PICTURE);
     }
@@ -76,10 +76,10 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT, null);
         intent.setType("image/*");
         intent.putExtra("crop", "true");
-        intent.putExtra("aspectX", 2);
+        intent.putExtra("aspectX", 1);
         intent.putExtra("aspectY", 1);
         intent.putExtra("outputX", 200);
-        intent.putExtra("outputY", 100);
+        intent.putExtra("outputY", 200);
         intent.putExtra("scale", true);
         intent.putExtra("return-data", true);
         intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
