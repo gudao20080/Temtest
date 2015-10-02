@@ -19,9 +19,22 @@
         android:layout_height="wrap_content"/>
 
     <Button
-        android:id="@+id/tv_take_big"
+        android:id="@+id/tv_camera"
         android:text="拍照"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/tv_take_big"
+        android:text="选择图片"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        />
 
 </LinearLayout>
