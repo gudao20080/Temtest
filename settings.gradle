@@ -1,1 +1,2 @@
 include ':app', ':ormlite', ':bitmapcrop'
+include ':photoIntentActivity'
