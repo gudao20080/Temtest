@@ -15,7 +15,10 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -28,18 +31,21 @@ public class MainActivity extends AppCompatActivity {
     private final int REQUEST_PICK = 4;
     private final int REQUEST_PICK_BIG = 5;
     private final int REQUEST_CAMERA = 6;
-    Uri imageUri;
-    String filePath;
-    private File imageFile;
+    private String mCurrentPhotoPath;
+
+    private static final String JPEG_FILE_PREFIX = "IMG_";
+    private static final String JPEG_FILE_SUFFIX = ".jpg";
+    private AlbumStorageDirFactory mAlbumStorageDirFactory = null;
 
 
     @Bind(R.id.image)
-    ImageView imageView;
+    ImageView mImageView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        mAlbumStorageDirFactory = new FroyoAlbumDirFactory();
          findViewById(R.id.tv_pick_big).setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View v) {
@@ -81,18 +87,67 @@ public class MainActivity extends AppCompatActivity {
      * 拍照
      */
     public void captureImageByCamera() {
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        File file = new File(Environment.getExternalStorageDirectory() + "/Images");
-        if(!file.exists()){
-            file.mkdirs();
-        }
-        imageFile = new File(Environment.getExternalStorageDirectory() + "/Images/",
-            "cameraImg" + String.valueOf(System.currentTimeMillis()) + ".png");
 
-        Uri mUri = Uri.fromFile(imageFile);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, mUri);
-        cameraIntent.putExtra("return-data", true);
-        startActivityForResult(cameraIntent, REQUEST_CAMERA);
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+            File f;
+
+            try {
+                f = setUpPhotoFile();
+                mCurrentPhotoPath = f.getAbsolutePath();
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+            } catch (IOException e) {
+                e.printStackTrace();
+                f = null;
+                mCurrentPhotoPath = null;
+            }
+
+        startActivityForResult(takePictureIntent, REQUEST_CAMERA);
+    }
+
+    private File setUpPhotoFile() throws IOException {
+
+        File f = createImageFile();
+        mCurrentPhotoPath = f.getAbsolutePath();
+
+        return f;
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
+        File albumF = getAlbumDir();
+        File imageF = File.createTempFile(imageFileName, JPEG_FILE_SUFFIX, albumF);
+        return imageF;
+    }
+
+
+    private File getAlbumDir() {
+        File storageDir = null;
+
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+
+            storageDir = mAlbumStorageDirFactory.getAlbumStorageDir(getAlbumName());
+
+            if (storageDir != null) {
+                if (! storageDir.mkdirs()) {
+                    if (! storageDir.exists()){
+                        Log.d("CameraSample", "failed to create directory");
+                        return null;
+                    }
+                }
+            }
+
+        } else {
+            Log.v(getString(R.string.app_name), "External storage is not mounted READ/WRITE.");
+        }
+
+        return storageDir;
+    }
+
+    private String getAlbumName() {
+        return "crop";
     }
 
     @Override
@@ -100,20 +155,14 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CAMERA ) { //拍照返回
-            Uri uri;
-            if (null == data) {
-                uri = Uri.fromFile(imageFile);
-            }else {
-                uri = data.getData();
+            if (resultCode == RESULT_OK) {
+                handleBigCameraPhoto();
             }
-            Log.d("way", "uri: " + uri);
-            imageView.setImageURI(uri);
-//            goCropActivity(uri);
 
         }else if (requestCode == REQUEST_PICK) {
             Uri uri = data.getData();
             Log.d("way", "uri: " + uri);
-            imageView.setImageURI(uri);
+            mImageView.setImageURI(uri);
 //            goCropActivity(uri);
         }
 
@@ -128,6 +177,25 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
 
     }
+
+    private void handleBigCameraPhoto() {
+
+        if (mCurrentPhotoPath != null) {
+            setPic();
+            galleryAddPic();
+            mCurrentPhotoPath = null;
+        }
+
+    }
+
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE");
+        File f = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
+    }
+
 
     private void setPic() {
         // Get the dimensions of the View
@@ -151,6 +219,14 @@ public class MainActivity extends AppCompatActivity {
 
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
         mImageView.setImageBitmap(bitmap);
+
+        Intent intent = new Intent(this, CropImageActivity.class);
+//        intent.putExtra("bitmap", bitmap);
+        MyApplication application = (MyApplication) getApplication();
+        application.mBitmap = bitmap;
+        startActivity(intent);
+
+
     }
 
     @Override
