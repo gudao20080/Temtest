@@ -162,10 +162,22 @@ public class MainActivity extends AppCompatActivity {
         }else if (requestCode == REQUEST_PICK) {
             Uri uri = data.getData();
             Log.d("way", "uri: " + uri);
-            mImageView.setImageURI(uri);
+
+            try {
+//                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+//                mImageView.setImageURI(uri);
+                String path = GetPathFromUri4kitkat.getPath(this, uri);
+                Bitmap bitmap = getBitmap(path, true);
+
+                mImageView.setImageBitmap(bitmap);
+
+                mImageView.setImageBitmap(bitmap);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
 //            goCropActivity(uri);
         }
-
 
         Toast.makeText(MainActivity.this, "onActivityResult", Toast.LENGTH_SHORT).show();
     }
@@ -226,7 +238,36 @@ public class MainActivity extends AppCompatActivity {
         application.mBitmap = bitmap;
         startActivity(intent);
 
+    }
 
+    private Bitmap getBitmap(String path ,boolean isLargeFlg){
+
+//先解析图片边框的大小
+        BitmapFactory.Options ops = new BitmapFactory.Options();
+        ops.inJustDecodeBounds = true;
+        Bitmap bm = BitmapFactory.decodeFile(path, ops);
+        ops.inSampleSize = 1;
+        int oHeight = ops.outHeight;
+        int oWidth = ops.outWidth;
+
+//控制压缩比
+        int contentHeight = 0;
+        int contentWidth = 0;
+        contentWidth = 400;
+        contentHeight = 800;
+//        if(isLargeFlg){
+//        }else{
+//            contentHeight = ITEM_HEIGHT;
+//            contentWidth = ITEM_WIDTH;
+//        }
+        if(((float)oHeight/contentHeight) < ((float)oWidth/contentWidth)){
+            ops.inSampleSize = (int) Math.ceil((float)oWidth/contentWidth);
+        }else{
+            ops.inSampleSize = (int) Math.ceil((float)oHeight/contentHeight);
+        }
+        ops.inJustDecodeBounds = false;
+        bm = BitmapFactory.decodeFile(path, ops);
+        return bm;
     }
 
     @Override
