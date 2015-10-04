@@ -1,13 +1,18 @@
 package wangkai.temtest;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -23,6 +28,19 @@ public class MainActivity extends AppCompatActivity {
 
     @Bind(R.id.spinner)
     Spinner mSpinner;
+    @Bind(R.id.btn_test_finish_activity)
+    Button finishBtn;
+    private Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            if (msg.what == 1) {
+                finishActivity(122);
+            }
+
+            return false;
+        }
+
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +73,15 @@ public class MainActivity extends AppCompatActivity {
 //                        Log.d(TAG, "onAnimationEnd() returned: ");
 //                    }
 //                }).start();
+
+        finishBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, Main2Activity.class);
+                startActivityForResult(intent, 122);
+                mHandler.sendEmptyMessageDelayed(1, 30000);
+            }
+        });
     }
 
     @OnClick(R.id.btn_viewPager_trans)
@@ -86,5 +113,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("way", requestCode + "");
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void finishActivityFromChild(Activity child, int requestCode) {
+        Log.d("way", "finishActivityFromChild: " + requestCode + "");
+        super.finishActivityFromChild(child, requestCode);
     }
 }
