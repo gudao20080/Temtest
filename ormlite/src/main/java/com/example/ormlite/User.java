@@ -1,5 +1,7 @@
 package com.example.ormlite;
 
+import android.support.annotation.IntDef;
+
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -42,11 +44,15 @@ public class User implements Serializable {
 	@DatabaseField(columnName = "rank")
 	private String rank;
 
-
+	public static final int auth = 33;
 
 	public User() {
 	}
 
+	@IntDef(auth)
+	public static @interface a {
+
+	}
 	public String getId() {
 		return id;
 	}

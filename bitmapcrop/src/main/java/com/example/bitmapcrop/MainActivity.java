@@ -238,6 +238,7 @@ public class MainActivity extends AppCompatActivity {
         application.mBitmap = bitmap;
         startActivity(intent);
 
+        String directoryDcim = Environment.DIRECTORY_DCIM;
     }
 
     private Bitmap getBitmap(String path ,boolean isLargeFlg){
