@@ -1,2 +1,2 @@
-include ':app', ':ormlite', ':bitmapcrop', ':actionbardemo', ':phonedemo', ':stechodebugdemo'
+include ':app', ':ormlite', ':bitmapcrop', ':actionbardemo', ':phonedemo', ':stechodebugdemo', ':recyclerviewdemo'
 include ':photoIntentActivity'
